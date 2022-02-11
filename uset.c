@@ -2,11 +2,11 @@
 #include <stdlib.h>
 #include "uset.h"
 
-static ele_t *make_ele(void *data, color_t color,
-                       ele_t *left, ele_t *right, ele_t *parent)
+static _ele_t *make_ele(void *data, char color, _ele_t *left, _ele_t *right,
+                       _ele_t *parent)
 {
-  ele_t *e;
-  if (!(e = malloc(sizeof(ele_t))))
+  _ele_t *e;
+  if (!(e = malloc(sizeof(_ele_t))))
     return NULL;
 
   e->data = data;
@@ -17,15 +17,15 @@ static ele_t *make_ele(void *data, color_t color,
   return e;
 }
 
-static void left_rotate(set_t *s, ele_t *e)
+static void left_rotate(uset_t *s, _ele_t *e)
 {
-  ele_t *y = e->right;
+  _ele_t *y = e->right;
   e->right = y->left;
-  if (y->left != s->nil)
+  if (y->left != s->_nil)
     y->left->parent = e;
   y->parent = e->parent;
-  if (e->parent == s->nil)
-    s->root = y;
+  if (e->parent == s->_nil)
+    s->_root = y;
   else if (e == e->parent->left)
     e->parent->left = y;
   else 
@@ -34,15 +34,15 @@ static void left_rotate(set_t *s, ele_t *e)
   e->parent = y;
 }
 
-static void right_rotate(set_t *s, ele_t *e)
+static void right_rotate(uset_t *s, _ele_t *e)
 {
-  ele_t *x = e->left;
+  _ele_t *x = e->left;
   e->left = x->right;
-  if (x->right != s->nil)
+  if (x->right != s->_nil)
     x->right->parent = e;
   x->parent = e->parent;
-  if (e->parent == s->nil)
-    s->root = x;
+  if (e->parent == s->_nil)
+    s->_root = x;
   else if (e == e->parent->left)
     e->parent->left = x;
   else 
@@ -51,11 +51,11 @@ static void right_rotate(set_t *s, ele_t *e)
   e->parent = x;
 }
 
-static void insert_fixup(set_t *s, ele_t *e)
+static void insert_fixup(uset_t *s, _ele_t *e)
 {
   while (e->parent->color == USET_R) {
     if (e->parent == e->parent->parent->left) {
-      ele_t *uncle = e->parent->parent->right;
+      _ele_t *uncle = e->parent->parent->right;
       if (uncle->color == USET_R) {
         e->parent->color = USET_B;
         uncle->color = USET_B;
@@ -71,7 +71,7 @@ static void insert_fixup(set_t *s, ele_t *e)
         right_rotate(s, e->parent->parent);
       }
     } else {
-      ele_t *uncle = e->parent->parent->left;
+      _ele_t *uncle = e->parent->parent->left;
       if (uncle->color == USET_R) {
         e->parent->color = USET_B;
         uncle->color = USET_B;
@@ -88,14 +88,59 @@ static void insert_fixup(set_t *s, ele_t *e)
       }
     }
   }
-  s->root->color = USET_B;
+  s->_root->color = USET_B;
 }
 
-set_t *uset_add(set_t *s, void *data)
+static void postorder_free(uset_t *s, _ele_t *e)
 {
-  ele_t *parent = s->nil;
-  ele_t **indirect = &(s->root);
-  while (*indirect != s->nil) {
+  if (e != s->_nil) {
+    postorder_free(s, e->left);
+    postorder_free(s, e->right);
+    free(e);
+  }
+}
+
+static void inorder_append(uset_t *s, _ele_t *e, void **entries, int *pp)
+{
+  if (e != s->_nil) {
+    inorder_append(s, e->left, entries, pp);
+    entries[(*pp)++] = e->data;
+    inorder_append(s, e->right, entries, pp);
+  }
+}
+
+static int preorder_every(uset_t *s, _ele_t *e, int (cmp)(void *))
+{
+  if (e != s->_nil)
+    return cmp(e->data) && preorder_every(s, e->left, cmp) &&
+        preorder_every(s, e->right, cmp);
+  else
+    return 1;
+}
+
+static int preorder_some(uset_t *s, _ele_t *e, int (cmp)(void *))
+{
+  if (e != s->_nil)
+    return cmp(e->data) || preorder_some(s, e->left, cmp) ||
+        preorder_some(s, e->right, cmp);
+  else
+    return 0;
+}
+
+static void inorder_apply(uset_t *s, _ele_t *e, void (callback)(void **))
+{
+  if (e != s->_nil) {
+    inorder_apply(s, e->left, callback);
+    callback(&(e->data));
+    inorder_apply(s, e->right, callback);
+  }
+}
+
+uset_t *uset_add(uset_t *s, void *data)
+{
+  _ele_t *parent = s->_nil;
+  _ele_t **indirect = &(s->_root);
+  while (*indirect != s->_nil) {
     void *pivot = (*indirect)->data;
     parent = *indirect;
     if (data < pivot)
@@ -107,22 +152,22 @@ set_t *uset_add(set_t *s, void *data)
       return s;
   }
 
-  ele_t *e = make_ele(data, USET_R, s->nil, s->nil, parent);
+  _ele_t *e = make_ele(data, USET_R, s->_nil, s->_nil, parent);
   *indirect = e;
   insert_fixup(s, e);
   s->size++;
   return s;
 }
 
-set_t *uset_create(int datac, void **datav)
+uset_t *uset_create(int datac, void **datav)
 {
-  set_t *s;
-  if (!(s = malloc(sizeof(set_t))))
+  uset_t *s;
+  if (!(s = malloc(sizeof(uset_t))))
     return NULL;
 
-  ele_t *nil = make_ele(NULL, USET_B, NULL, NULL, NULL); 
-  s->nil = nil;
-  s->root = nil;
+  _ele_t *nil = make_ele(NULL, USET_B, NULL, NULL, NULL); 
+  s->_nil = nil;
+  s->_root = nil;
   s->size = 0;
 
   while (--datac >= 0)
@@ -131,16 +176,51 @@ set_t *uset_create(int datac, void **datav)
   return s;
 }
 
-void uset_clear(set_t *s)
+void uset_clear(uset_t *s)
 {
-
+  postorder_free(s, s->_root);
+  s->_root = s->_nil;
+  s->size = 0;
 }
 
-int uset_has(set_t *s, const void *data)
+void uset_free(uset_t *s)
 {
-  ele_t *e = s->root;
-  while (e != s->nil && e->data != data)
+  uset_clear(s);
+  free(s->_nil);
+  free(s);
+}
+
+int uset_has(uset_t *s, const void *data)
+{
+  _ele_t *e = s->_root;
+  while (e != s->_nil && e->data != data)
     e = (data < e->data)? e->left : e->right;
 
-  return e != s->nil;
+  return e != s->_nil;
+}
+
+void **uset_entries(uset_t *s)
+{
+  int p = 0;
+  void **entries;
+  if (!(entries = malloc(s->size * sizeof(void *))))
+    return NULL;
+
+  inorder_append(s, s->_root, entries, &p);
+  return entries;
+}
+
+void uset_foreach(uset_t *s, void (*callback)(void **))
+{
+  inorder_apply(s, s->_root, callback);
+}
+
+int uset_every(uset_t *s, int (cmp)(void *))
+{
+  return preorder_every(s, s->_root, cmp);
+}
+
+int uset_some(uset_t *s, int (cmp)(void *))
+{
+  return preorder_some(s, s->_root, cmp);
 }
