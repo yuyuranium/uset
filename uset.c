@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "set.h"
+#include "uset.h"
 
 static ele_t *make_ele(void *data, color_t color,
                        ele_t *left, ele_t *right, ele_t *parent)
@@ -53,45 +53,45 @@ static void right_rotate(set_t *s, ele_t *e)
 
 static void insert_fixup(set_t *s, ele_t *e)
 {
-  while (e->parent->color == R) {
+  while (e->parent->color == USET_R) {
     if (e->parent == e->parent->parent->left) {
       ele_t *uncle = e->parent->parent->right;
-      if (uncle->color == R) {
-        e->parent->color = B;
-        uncle->color = B;
-        e->parent->parent->color = R;
+      if (uncle->color == USET_R) {
+        e->parent->color = USET_B;
+        uncle->color = USET_B;
+        e->parent->parent->color = USET_R;
         e = e->parent->parent;
       } else {
         if (e == e->parent->right) {
           e = e->parent;
           left_rotate(s, e);
         }
-        e->parent->color = B;
-        e->parent->parent->color = R;
+        e->parent->color = USET_B;
+        e->parent->parent->color = USET_R;
         right_rotate(s, e->parent->parent);
       }
     } else {
       ele_t *uncle = e->parent->parent->left;
-      if (uncle->color == R) {
-        e->parent->color = B;
-        uncle->color = B;
-        e->parent->parent->color = R;
+      if (uncle->color == USET_R) {
+        e->parent->color = USET_B;
+        uncle->color = USET_B;
+        e->parent->parent->color = USET_R;
         e = e->parent->parent;
       } else {
         if (e == e->parent->left) {
           e = e->parent;
           right_rotate(s, e);
         }
-        e->parent->color = B;
-        e->parent->parent->color = R;
+        e->parent->color = USET_B;
+        e->parent->parent->color = USET_R;
         left_rotate(s, e->parent->parent);
       }
     }
   }
-  s->root->color = B;
+  s->root->color = USET_B;
 }
 
-set_t *set_add(set_t *s, void *data)
+set_t *uset_add(set_t *s, void *data)
 {
   ele_t *parent = s->nil;
   ele_t **indirect = &(s->root);
@@ -107,44 +107,40 @@ set_t *set_add(set_t *s, void *data)
       return s;
   }
 
-  ele_t *e = make_ele(data, R, s->nil, s->nil, parent);
+  ele_t *e = make_ele(data, USET_R, s->nil, s->nil, parent);
   *indirect = e;
   insert_fixup(s, e);
   s->size++;
   return s;
 }
 
-set_t *make_set(int datac, void **datav)
+set_t *uset_create(int datac, void **datav)
 {
   set_t *s;
   if (!(s = malloc(sizeof(set_t))))
     return NULL;
 
-  ele_t *nil = make_ele(NULL, B, NULL, NULL, NULL); 
+  ele_t *nil = make_ele(NULL, USET_B, NULL, NULL, NULL); 
   s->nil = nil;
   s->root = nil;
   s->size = 0;
 
   while (--datac >= 0)
-    set_add(s, datav[datac]);
+    uset_add(s, datav[datac]);
 
   return s;
 }
 
-void set_clear(set_t *s)
+void uset_clear(set_t *s)
 {
 
 }
 
-int set_has(set_t *s, const void *data)
+int uset_has(set_t *s, const void *data)
 {
   ele_t *e = s->root;
-  while (e != s->nil && e->data != data) {
-    if (data < e->data)
-      e = e->left;
-    else
-      e = e->right;
-  }
+  while (e != s->nil && e->data != data)
+    e = (data < e->data)? e->left : e->right;
 
   return e != s->nil;
 }
