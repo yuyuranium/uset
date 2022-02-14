@@ -4,14 +4,14 @@
 #define USET_R 'R'
 #define USET_B 'B'
 
-typedef struct _ele {
+struct uset_ele {
   void *data;
   char color;
-  struct _ele *left, *right, *parent;
-} _ele_t;
+  struct uset_ele *left, *right, *parent;
+};
 
 typedef struct uset {
-  _ele_t *_root, *_nil;
+  struct uset_ele *_root, *_nil;
   int size;
 } uset_t;
 
@@ -29,10 +29,10 @@ int uset_has(uset_t *s, const void *data);
 
 void **uset_entries(uset_t *s);
 
-void uset_foreach(uset_t *s, void (callback)(void **));
+void uset_foreach(uset_t *s, void (callback)(void **datap));
 
-int uset_every(uset_t *s, int (cmp)(void *));
+int uset_every(uset_t *s, int (cmp)(void *data));
 
-int uset_some(uset_t *s, int (cmp)(void *));
+int uset_some(uset_t *s, int (cmp)(void *data));
 
 #endif

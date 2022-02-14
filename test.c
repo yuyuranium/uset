@@ -44,11 +44,13 @@ int main(int argc, char *argv[])
   uset_t *s = uset_create(datac, (void **)datav);
 
   printf("every element > 0? %d\n", uset_every(s, gtz));
-  printf("some elements are odd? %d\n", uset_some(s, odd));
-  printf("some element < 0? %d\n", uset_some(s, ltz));
   printf("every element is odd? %d\n", uset_every(s, odd));
+  printf("some elements < 0? %d\n", uset_some(s, ltz));
+  printf("some elements are odd? %d\n", uset_some(s, odd));
 
   uset_foreach(s, plus1);
+  printf("Plus1 to each element\n");
+  printf("Show hex\n");
   uset_foreach(s, show_hex);
 
   void **entries = uset_entries(s);
