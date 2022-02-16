@@ -17,16 +17,36 @@ int odd(void *data)
   return (long)data & 1;
 }
 
-void plus1(void **datap)
+void show_hex(void *data)
 {
-  long *p = (long *)datap;
-  (*p)++;
+  long p = (long)data;
+  printf("0x%lx\n", p);
 }
 
-void show_hex(void **datap)
+void level_order(uset_t *s)
 {
-  long *p = (long *)datap;
-  printf("0x%lx\n", *p);
+  struct uset_ele **q = malloc(32 * sizeof(struct uset_ele *));
+  int tail = -1, head = -1;
+  int cnt = 0, flag = 1;
+  q[++tail] = s->_root;
+  while (head != tail) {
+    struct uset_ele *e = q[++head];
+    if (e != s->_nil) {
+      printf("[%c%ld] ", e->color, (long)e->data);
+      q[++tail] = e->left;
+      q[++tail] = e->right;
+    } else {
+      printf("[ ] ");
+    }
+    cnt++;
+    if (cnt == flag) {
+      printf("\n");
+      flag <<= 1;
+      cnt = 0;
+    }
+  }
+  printf("\n");
+  free(q);
 }
 
 int main(int argc, char *argv[])
@@ -36,7 +56,7 @@ int main(int argc, char *argv[])
 
   printf("datav: ");
   for (int i = 0; i < datac; ++i) {
-    datav[i] = rand() % 100;
+    datav[i] = i;
     printf("%ld ", datav[i]);
   }
   printf("\n");
@@ -48,16 +68,25 @@ int main(int argc, char *argv[])
   printf("some elements < 0? %d\n", uset_some(s, ltz));
   printf("some elements are odd? %d\n", uset_some(s, odd));
 
-  uset_foreach(s, plus1);
   printf("Plus1 to each element\n");
   printf("Show hex\n");
   uset_foreach(s, show_hex);
+  for (long i = 0; i < datac; ++i) {
+    if (odd((void *)i)) {
+      printf("Deleting %ld, success: %d\n", i, uset_delete(s, (void *) i));
+      level_order(s);
+    }
+  }
+  printf("some elements are odd? %d\n", uset_some(s, odd));
+  uset_add(uset_add(uset_add(s, (void *)10), (void *)9), (void *)8);
+  printf("%d\n", uset_delete(s, (void *)3));
 
   void **entries = uset_entries(s);
   printf("entries: ");
   for (int i = 0; i < s->size; ++i)
     printf("%ld ", (long)entries[i]);
   printf("\n");
+  level_order(s);
 
   uset_clear(s);
 

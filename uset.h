@@ -1,8 +1,8 @@
 #ifndef _USET_H
 #define _USET_H
 
-#define USET_R 'R'
-#define USET_B 'B'
+#define USET_RED 'R'
+#define USET_BLACK 'B'
 
 struct uset_ele {
   void *data;
@@ -29,7 +29,7 @@ int uset_has(uset_t *s, const void *data);
 
 void **uset_entries(uset_t *s);
 
-void uset_foreach(uset_t *s, void (callback)(void **datap));
+void uset_foreach(uset_t *s, void (callback)(void *data));
 
 int uset_every(uset_t *s, int (cmp)(void *data));
 
