@@ -24,6 +24,7 @@ static void left_rotate(uset_t *s, struct uset_ele *e)
   e->right = y->left;
   if (y->left != s->_nil)
     y->left->parent = e;
+
   y->parent = e->parent;
   if (e->parent == s->_nil)
     s->_root = y;
@@ -31,6 +32,7 @@ static void left_rotate(uset_t *s, struct uset_ele *e)
     e->parent->left = y;
   else 
     e->parent->right = y;
+
   y->left = e;
   e->parent = y;
 }
@@ -41,6 +43,7 @@ static void right_rotate(uset_t *s, struct uset_ele *e)
   e->left = x->right;
   if (x->right != s->_nil)
     x->right->parent = e;
+
   x->parent = e->parent;
   if (e->parent == s->_nil)
     s->_root = x;
@@ -48,6 +51,7 @@ static void right_rotate(uset_t *s, struct uset_ele *e)
     e->parent->left = x;
   else 
     e->parent->right = x;
+
   x->right = e;
   e->parent = x;
 }
@@ -107,6 +111,7 @@ static void transplant(uset_t *s, struct uset_ele *u, struct uset_ele *v)
     u->parent->left = v;
   else
     u->parent->right = v;
+
   v->parent = u->parent;
 }
 
@@ -122,6 +127,7 @@ static void delete_fixup(uset_t *s, struct uset_ele *x)
         left_rotate(s, x->parent);
         w = x->parent->right;
       }
+
       if (w->left->color == USET_BLACK && w->right->color == USET_BLACK) {
         w->color = USET_RED;
         x = x->parent;
@@ -146,6 +152,7 @@ static void delete_fixup(uset_t *s, struct uset_ele *x)
         right_rotate(s, x->parent);
         w = x->parent->left;
       }
+
       if (w->right->color == USET_BLACK && w->left->color == USET_BLACK) {
         w->color = USET_RED;
         x = x->parent;
@@ -253,6 +260,7 @@ int uset_delete(uset_t *s, void *data)
 
   struct uset_ele *y = z, *x;
   char y_orig_color = y->color;
+
   if (z->left == s->_nil) {
     x = z->right;
     transplant(s, z, z->right);
@@ -275,8 +283,10 @@ int uset_delete(uset_t *s, void *data)
     y->left->parent = y;
     y->color = z->color;
   }
+
   if (y_orig_color == USET_BLACK)
     delete_fixup(s, x);
+
   free(z);
   s->size--;
   return 1;
