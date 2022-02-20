@@ -174,7 +174,7 @@ static void delete_fixup(uset_t *s, struct uset_ele *x)
   x->color = USET_BLACK;
 }
 
-static struct uset_ele *search(uset_t *s, const void *data) {
+inline static struct uset_ele *search(uset_t *s, const void *data) {
   struct uset_ele *e = s->_root;
   while (e != s->_nil && e->data != data)
     e = (e->data < data)? e->right : e->left;
