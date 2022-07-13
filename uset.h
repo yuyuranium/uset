@@ -1,12 +1,12 @@
 #ifndef _USET_H
 #define _USET_H
 
-#define USET_RED 'R'
-#define USET_BLACK 'B'
+#define USET_RED   1
+#define USET_BLACK 0
 
 struct uset_ele {
     void *data;
-    char color;
+    unsigned char color;
     struct uset_ele *left, *right, *parent;
 };
 
