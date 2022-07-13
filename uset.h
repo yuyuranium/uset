@@ -1,8 +1,8 @@
 #ifndef _USET_H
 #define _USET_H
 
-#define USET_RED   1
-#define USET_BLACK 0
+#define USET_R 1
+#define USET_B 0
 
 struct uset_ele {
     void *data;
@@ -35,4 +35,4 @@ int uset_every(uset_t *s, int (cmp)(void *data));
 
 int uset_some(uset_t *s, int (cmp)(void *data));
 
-#endif
+#endif  // _USET_H

@@ -58,42 +58,42 @@ static void right_rotate(uset_t *s, struct uset_ele *e)
 
 static void insert_fixup(uset_t *s, struct uset_ele *e)
 {
-    while (e->parent->color == USET_RED) {
+    while (e->parent->color == USET_R) {
         if (e->parent == e->parent->parent->left) {
             struct uset_ele *uncle = e->parent->parent->right;
-            if (uncle->color == USET_RED) {
-                e->parent->color = USET_BLACK;
-                uncle->color = USET_BLACK;
-                e->parent->parent->color = USET_RED;
+            if (uncle->color == USET_R) {
+                e->parent->color = USET_B;
+                uncle->color = USET_B;
+                e->parent->parent->color = USET_R;
                 e = e->parent->parent;
             } else {
                 if (e == e->parent->right) {
                     e = e->parent;
                     left_rotate(s, e);
                 }
-                e->parent->color = USET_BLACK;
-                e->parent->parent->color = USET_RED;
+                e->parent->color = USET_B;
+                e->parent->parent->color = USET_R;
                 right_rotate(s, e->parent->parent);
             }
         } else {
             struct uset_ele *uncle = e->parent->parent->left;
-            if (uncle->color == USET_RED) {
-                e->parent->color = USET_BLACK;
-                uncle->color = USET_BLACK;
-                e->parent->parent->color = USET_RED;
+            if (uncle->color == USET_R) {
+                e->parent->color = USET_B;
+                uncle->color = USET_B;
+                e->parent->parent->color = USET_R;
                 e = e->parent->parent;
             } else {
                 if (e == e->parent->left) {
                     e = e->parent;
                     right_rotate(s, e);
                 }
-                e->parent->color = USET_BLACK;
-                e->parent->parent->color = USET_RED;
+                e->parent->color = USET_B;
+                e->parent->parent->color = USET_R;
                 left_rotate(s, e->parent->parent);
             }
         }
     }
-    s->_root->color = USET_BLACK;
+    s->_root->color = USET_B;
 }
 
 static struct uset_ele *minimum(uset_t *s, struct uset_ele *e)
@@ -117,61 +117,61 @@ static void transplant(uset_t *s, struct uset_ele *u, struct uset_ele *v)
 
 static void delete_fixup(uset_t *s, struct uset_ele *x)
 {
-    while (x != s->_root && x->color == USET_BLACK) {
+    while (x != s->_root && x->color == USET_B) {
         struct uset_ele *w;
         if (x == x->parent->left) {
             w = x->parent->right;
-            if (w->color == USET_RED) {
-                w->color = USET_BLACK;
-                x->parent->color = USET_RED;
+            if (w->color == USET_R) {
+                w->color = USET_B;
+                x->parent->color = USET_R;
                 left_rotate(s, x->parent);
                 w = x->parent->right;
             }
 
-            if (w->left->color == USET_BLACK && w->right->color == USET_BLACK) {
-                w->color = USET_RED;
+            if (w->left->color == USET_B && w->right->color == USET_B) {
+                w->color = USET_R;
                 x = x->parent;
             } else {
-                if (w->right->color == USET_BLACK) {
-                    w->left->color = USET_BLACK;
-                    w->color = USET_RED;
+                if (w->right->color == USET_B) {
+                    w->left->color = USET_B;
+                    w->color = USET_R;
                     right_rotate(s, w);
                     w = x->parent->right;
                 }
                 w->color = x->parent->color;
-                x->parent->color = USET_BLACK;
-                w->right->color = USET_BLACK;
+                x->parent->color = USET_B;
+                w->right->color = USET_B;
                 left_rotate(s, x->parent);
                 x = s->_root;
             }
         } else {
             w = x->parent->left;
-            if (w->color == USET_RED) {
-                w->color = USET_BLACK;
-                x->parent->color = USET_RED;
+            if (w->color == USET_R) {
+                w->color = USET_B;
+                x->parent->color = USET_R;
                 right_rotate(s, x->parent);
                 w = x->parent->left;
             }
 
-            if (w->right->color == USET_BLACK && w->left->color == USET_BLACK) {
-                w->color = USET_RED;
+            if (w->right->color == USET_B && w->left->color == USET_B) {
+                w->color = USET_R;
                 x = x->parent;
             } else {
-                if (w->left->color == USET_BLACK) {
-                    w->right->color = USET_BLACK;
-                    w->color = USET_RED;
+                if (w->left->color == USET_B) {
+                    w->right->color = USET_B;
+                    w->color = USET_R;
                     left_rotate(s, w);
                     w = x->parent->left;
                 }
                 w->color = x->parent->color;
-                x->parent->color = USET_BLACK;
-                w->left->color = USET_BLACK;
+                x->parent->color = USET_B;
+                w->left->color = USET_B;
                 right_rotate(s, x->parent);
                 x = s->_root;
             }
         }
     }
-    x->color = USET_BLACK;
+    x->color = USET_B;
 }
 
 inline static struct uset_ele *search(uset_t *s, const void *data) {
@@ -192,7 +192,7 @@ static void postorder_free_all(uset_t *s, struct uset_ele *e)
 }
 
 static void inorder_append(uset_t *s, struct uset_ele *e, void **entries,
-        int *pp)
+                           int *pp)
 {
     if (e != s->_nil) {
         inorder_append(s, e->left, entries, pp);
@@ -220,7 +220,7 @@ static int preorder_some(uset_t *s, struct uset_ele *e, int (cmp)(void *))
 }
 
 static void inorder_apply(uset_t *s, struct uset_ele *e,
-        void (callback)(void *data))
+                          void (callback)(void *data))
 {
     if (e != s->_nil) {
         inorder_apply(s, e->left, callback);
@@ -245,7 +245,7 @@ uset_t *uset_add(uset_t *s, void *data)
             return s;
     }
 
-    struct uset_ele *e = make_ele(data, USET_RED, s->_nil, s->_nil, parent);
+    struct uset_ele *e = make_ele(data, USET_R, s->_nil, s->_nil, parent);
     *indirect = e;
     insert_fixup(s, e);
     s->size++;
@@ -284,7 +284,7 @@ int uset_delete(uset_t *s, void *data)
         y->color = z->color;
     }
 
-    if (y_orig_color == USET_BLACK)
+    if (y_orig_color == USET_B)
         delete_fixup(s, x);
 
     free(z);
@@ -298,7 +298,7 @@ uset_t *uset_create(int datac, void **datav)
     if (!(s = malloc(sizeof(uset_t))))
         return NULL;
 
-    struct uset_ele *nil = make_ele(NULL, USET_BLACK, NULL, NULL, NULL); 
+    struct uset_ele *nil = make_ele(NULL, USET_B, NULL, NULL, NULL); 
     s->_nil = nil;
     s->_root = nil;
     s->size = 0;
