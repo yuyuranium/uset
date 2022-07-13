@@ -5,14 +5,14 @@
 #define USET_BLACK 'B'
 
 struct uset_ele {
-  void *data;
-  char color;
-  struct uset_ele *left, *right, *parent;
+    void *data;
+    char color;
+    struct uset_ele *left, *right, *parent;
 };
 
 typedef struct uset {
-  struct uset_ele *_root, *_nil;
-  int size;
+    struct uset_ele *_root, *_nil;
+    int size;
 } uset_t;
 
 uset_t *uset_create(int datac, void **datav);
