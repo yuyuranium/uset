@@ -14,7 +14,7 @@ LDFLAGS = -L. -luset
 
 .PHONY: clean all so ar test
 
-all: uset.o ar test
+all: uset.o ar
 
 ar: uset.o
 	@echo "Making static library..."
