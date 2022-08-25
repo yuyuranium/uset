@@ -1,19 +1,7 @@
 #ifndef _USET_H
 #define _USET_H
 
-#define USET_R 1
-#define USET_B 0
-
-struct uset_ele {
-    void *data;
-    unsigned char color;
-    struct uset_ele *left, *right, *parent;
-};
-
-typedef struct uset {
-    struct uset_ele *_root, *_nil;
-    int size;
-} uset_t;
+typedef struct uset uset_t;
 
 uset_t *uset_create(int datac, void **datav);
 
@@ -24,6 +12,8 @@ void uset_free(uset_t *s);
 uset_t *uset_add(uset_t *s, void *data);
 
 int uset_delete(uset_t *s, void *data);
+
+int uset_size(uset_t *s);
 
 int uset_has(uset_t *s, const void *data);
 

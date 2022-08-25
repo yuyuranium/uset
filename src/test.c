@@ -47,7 +47,7 @@ int main(int argc, char *argv[])
     uset_foreach(s, show_hex);
 
     void **entries = uset_entries(s);
-    int entries_sz = s->size;
+    int entries_sz = uset_size(s);
     printf("entries: [ ");
     for (int i = 0; i < entries_sz; ++i)
         printf("%ld ", (long)entries[i]);

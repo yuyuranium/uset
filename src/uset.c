@@ -2,6 +2,20 @@
 #include <stdlib.h>
 #include "uset.h"
 
+#define USET_R 1
+#define USET_B 0
+
+struct uset_ele {
+    void *data;
+    unsigned char color;
+    struct uset_ele *left, *right, *parent;
+};
+
+struct uset {
+    struct uset_ele *_root, *_nil;
+    int size;
+};
+
 static struct uset_ele *make_ele(void *data, char color, struct uset_ele *left,
                                  struct uset_ele *right,
                                  struct uset_ele *parent)
@@ -326,6 +340,11 @@ void uset_free(uset_t *s)
 int uset_has(uset_t *s, const void *data)
 {
     return search(s, data) != s->_nil;
+}
+
+int uset_size(uset_t *s)
+{
+    return s->size;
 }
 
 void **uset_entries(uset_t *s)
